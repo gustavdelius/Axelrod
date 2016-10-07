@@ -17,7 +17,8 @@ class TestResultSet(unittest.TestCase):
 
         cls.filename = "test_outputs/test_results.csv"
 
-        cls.players = (axelrod.Alternator(), axelrod.TitForTat(), axelrod.Defector())
+        cls.players = [axelrod.Alternator(), axelrod.TitForTat(),
+                       axelrod.Defector()]
         cls.turns = 5
         cls.matches = {
                         (0,1): [axelrod.Match((cls.players[0], cls.players[1]),
@@ -161,7 +162,6 @@ class TestResultSet(unittest.TestCase):
     def test_init(self):
         rs = axelrod.ResultSet(self.players, self.interactions,
                                progress_bar=False)
-        self.assertFalse(rs.progress_bar)
         self.assertEqual(rs.players, self.players)
         self.assertEqual(rs.nplayers, len(self.players))
         self.assertEqual(rs.interactions, self.interactions)
@@ -186,18 +186,12 @@ class TestResultSet(unittest.TestCase):
     def test_with_progress_bar(self):
         rs = axelrod.ResultSet(self.players, self.interactions)
         self.assertTrue(rs.progress_bar)
-        self.assertEqual(rs.progress_bar.total, 19)
+        self.assertEqual(rs.progress_bar.total, 10 + 2 * rs.nplayers)
 
         rs = axelrod.ResultSet(self.players, self.interactions,
                                progress_bar=True)
         self.assertTrue(rs.progress_bar)
-        self.assertEqual(rs.progress_bar.total, 19)
-
-    def test_null_results_matrix(self):
-        rs = axelrod.ResultSet(self.players, self.interactions,
-                               progress_bar=False)
-        self.assertEqual(
-            rs._null_results_matrix, self.expected_null_results_matrix)
+        self.assertEqual(rs.progress_bar.total, 10 + 2 * rs.nplayers)
 
     def test_match_lengths(self):
         rs = axelrod.ResultSet(self.players, self.interactions,
@@ -650,7 +644,8 @@ class TestResultSetSpatialStructure(TestResultSet):
     @classmethod
     def setUpClass(cls):
 
-        cls.players = (axelrod.Alternator(), axelrod.TitForTat(), axelrod.Defector())
+        cls.players = [axelrod.Alternator(), axelrod.TitForTat(),
+                       axelrod.Defector()]
         cls.turns = 5
         cls.edges = [(0, 1), (0, 2)]
         cls.matches = { (0,1): [axelrod.Match((cls.players[0], cls.players[1]),
@@ -832,8 +827,8 @@ class TestResultSetSpatialStructureTwo(TestResultSetSpatialStructure):
     @classmethod
     def setUpClass(cls):
 
-        cls.players = (axelrod.Alternator(), axelrod.TitForTat(),
-                       axelrod.Defector(), axelrod.Cooperator())
+        cls.players = [axelrod.Alternator(), axelrod.TitForTat(),
+                       axelrod.Defector(), axelrod.Cooperator()]
         cls.turns = 5
         cls.edges = [(0, 1), (2, 3)]
         cls.matches = { (0,1): [axelrod.Match((cls.players[0], cls.players[1]),
@@ -1002,8 +997,8 @@ class TestResultSetSpatialStructureThree(TestResultSetSpatialStructure):
     @classmethod
     def setUpClass(cls):
 
-        cls.players = (axelrod.Alternator(), axelrod.TitForTat(),
-                       axelrod.Defector(), axelrod.Cooperator())
+        cls.players = [axelrod.Alternator(), axelrod.TitForTat(),
+                       axelrod.Defector(), axelrod.Cooperator()]
         cls.turns = 5
         cls.edges = [(0, 0), (1, 1), (2, 2), (3, 3)]
         cls.matches = {(i, i): [axelrod.Match((cls.players[i],
@@ -1040,7 +1035,7 @@ class TestResultSetSpatialStructureThree(TestResultSetSpatialStructure):
                 ]
 
         cls.expected_normalised_scores =[
-               ["nan" for _ in range(3)] for i in range(4)
+               [0 for _ in range(3)] for i in range(4)
                 ]
 
         cls.expected_ranking = [0, 1, 2, 3]
@@ -1126,17 +1121,6 @@ class TestResultSetSpatialStructureThree(TestResultSetSpatialStructure):
 
         cls.expected_csv = (
             'Alternator,Tit For Tat,Defector,Cooperator\nnan,nan,nan,nan\nnan,nan,nan,nan\nnan,nan,nan,nan\n')
-
-    def test_normalised_scores(self):
-        """
-        Need to test string representation because of nan
-        """
-        rs = axelrod.ResultSet(self.players, self.interactions,
-                               progress_bar=False)
-        self.assertIsInstance(rs.normalised_scores, list)
-        self.assertEqual(len(rs.normalised_scores), rs.nplayers)
-        self.assertEqual([[str(s) for s in player] for player in rs.normalised_scores]
-                         , self.expected_normalised_scores)
 
     def test_equality(self):
         """Overwriting for this particular case"""
